@@ -10,7 +10,7 @@ feature 'User sign up' do
   # feature tests and we want to keep this example simple.
 
   scenario 'I can sign up as new user' do
-    user = build :user
+    user = build :user #this is so that an instance of user is returned but not saved
     expect { sign_up(user) }.to change(User, :count).by(1)
     expect(page).to have_content("Welcome, #{user.email}")
     expect(User.first.email).to eq user.email
@@ -23,14 +23,14 @@ feature 'User sign up' do
     user = create(:user, password_confirmation: 'wrong')
     expect { sign_up(user) }.not_to change(User, :count)
     expect(current_path).to eq '/users'
-    expect(page).to have_content 'Password and confirmation password do not match'
+    expect(page).to have_content 'Password does not match the confirmation'
   end
 
 
   scenario 'without an email' do
     user_no_email = create(:user, email: "")
     expect { sign_up(user_no_email) }.to_not change(User, :count)
-    expect(current_path).to eq '/users/new'
+    expect(current_path).to eq '/users'
   end
 
   scenario 'I cannot sign up with an existing email' do
@@ -40,12 +40,4 @@ feature 'User sign up' do
     expect(page).to have_content('Email is already taken')
   end
 
-end
-
-def sign_up(user) # <--helper method!
-  visit '/users/new'
-  fill_in :email, with: user.email
-  fill_in :password, with: user.password
-  fill_in :password_confirmation, with: user.password_confirmation
-  click_button 'Sign up'
 end
